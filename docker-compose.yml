@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Serviço do seu Backend (API)
+  api:
+    container_name: kenmonetz-api
+    build: . # Constrói a imagem usando o Dockerfile da pasta atual
+    ports:
+      - "3000:3000" # Mapeia a porta 3000 do container para a 3000 do seu PC
+    environment:
+      # Variáveis de ambiente para desenvolvimento local
+      - NODE_ENV=development
+      - DB_HOST=postgres # Nome do serviço do banco de dados
+      - DB_PORT=5432
+      - DB_USER=kenmonetz_user
+      - DB_PASS=kenmonetz_password
+      - DB_NAME=kenmonetz_db
+      - DB_DIALECT=postgres
+      - JWT_SECRET=seu_jwt_super_secreto_dev
+      # ... adicione suas outras chaves de API aqui para testes locais
+    depends_on:
+      - postgres # Garante que o banco de dados suba primeiro
+    volumes:
+      - .:/usr/src/app # Monta o código local dentro do container (para hot-reloading)
+    command: npm run dev # Usa o nodemon para reiniciar automaticamente se o código mudar
+
+  # Serviço do Banco de Dados
+  postgres:
+    image: postgres:15-alpine
+    container_name: kenmonetz-db
+    environment:
+      - POSTGRES_USER=kenmonetz_user
+      - POSTGRES_PASSWORD=kenmonetz_password
+      - POSTGRES_DB=kenmonetz_db
+    ports:
+      - "5432:5432" # Mapeia a porta do banco para poder acessar com um cliente GUI
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persiste os dados do banco
+
+volumes:
+  postgres_data:
